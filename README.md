@@ -208,13 +208,96 @@ SP_API_CLIENT_SECRET=xxxxx
 SP_API_REFRESH_TOKEN=xxxxx
 ```
 
-**Don't have SP-API yet?** No problem — the agent works perfectly without it. You can add ASINs to your sheet manually, or set up SP-API later.
+**Don't have SP-API yet?** No problem — the agent works perfectly without it. You can add ASINs to your sheet manually, or set up SP-API later. When you're ready, follow the guide below.
 
-To get SP-API access:
-1. Register as a developer at [developer.amazonservices.com](https://developer.amazonservices.com/)
-2. Create a new app (self-authorization for your own seller account)
-3. Get your LWA client ID, client secret, and refresh token
-4. This process can take a few days for Amazon to approve
+### How to get SP-API credentials (step by step)
+
+This takes about 15-20 minutes of setup, then 1-3 days for Amazon to approve.
+
+#### Part A — Register as a Developer
+
+1. Log in to **Seller Central** (sellercentral.amazon.ca)
+2. Go to **Apps & Services** (top menu bar) > **Develop Apps**
+   - If you don't see this option, go to **Settings** (gear icon, top right) > **User Permissions** and make sure your account has developer access
+3. You'll land on the **Developer Central** page
+4. Click **Proceed to Developer Profile** (or **Your Developer Profile** if you've been here before)
+5. Fill out the developer registration form:
+   - **Developer name:** Your business name (or your personal name)
+   - **Primary contact email:** Your email
+   - **Data Protection Officer email:** Same email is fine
+   - **Company/individual:** Select what applies
+   - **About your organization:** Keep it simple — "I am building internal tools to manage my Amazon seller account"
+   - **Data handling questions:** Answer honestly. You're only accessing your own data. Select that you will NOT share data with third parties.
+6. Click **Register** and accept the terms
+7. Amazon reviews your application — this usually takes **24-72 hours**. You'll get an email when approved.
+
+#### Part B — Create an App (after approval)
+
+1. Go back to **Apps & Services** > **Develop Apps**
+2. Click **Add new app client**
+3. Fill in:
+   - **App name:** `order-agent` (or whatever you want)
+   - **API Type:** Select **SP API**
+   - **IAM ARN:** You need an AWS IAM ARN. If you don't have one:
+
+     **Quick IAM setup (free):**
+     1. Go to [aws.amazon.com](https://aws.amazon.com/) and create a free account (or sign in)
+     2. Go to **IAM** service (search "IAM" in the top bar)
+     3. Click **Users** > **Create user**
+        - Username: `sp-api-user`
+        - Click **Next**
+     4. On Permissions page, click **Attach policies directly**
+        - Search for and check **`AdministratorAccess`** (or create a custom policy — but admin is easiest for personal use)
+        - Click **Next** > **Create user**
+     5. Click on the new user > **Security credentials** tab
+     6. Under **Access keys**, click **Create access key**
+        - Use case: **Third-party service**
+        - Click **Create access key**
+        - Save the **Access Key ID** and **Secret Access Key** somewhere safe
+     7. Now create an **IAM Role**:
+        - Go to **IAM** > **Roles** > **Create role**
+        - Trusted entity: **AWS account** > **This account**
+        - Click **Next**
+        - Attach policy: **`AdministratorAccess`**
+        - Role name: `sp-api-role`
+        - Click **Create role**
+     8. Click on the role you just created
+     9. Copy the **ARN** — it looks like: `arn:aws:iam::123456789012:role/sp-api-role`
+
+   - Paste that ARN into the **IAM ARN** field in Seller Central
+4. Click **Save and exit**
+
+#### Part C — Self-Authorize & Get Your Credentials
+
+1. On the **Develop Apps** page, find your app and click **Authorize** (or the "LWA credentials" link)
+2. Click **Authorize** to self-authorize the app for your own seller account
+   - This generates a **Refresh Token** — **copy it immediately**, you won't see it again
+   - If you miss it, you can click **Authorize** again to generate a new one
+3. On the same app page, find **LWA credentials**:
+   - **Client ID** — starts with `amzn1.application-oa2-client.`
+   - **Client Secret** — click "Show" to reveal it
+
+#### Part D — Add to your .env
+
+Open your `.env` file and add:
+
+```
+SP_API_CLIENT_ID=amzn1.application-oa2-client.xxxxx
+SP_API_CLIENT_SECRET=your-client-secret-here
+SP_API_REFRESH_TOKEN=Atzr|your-refresh-token-here
+```
+
+Restart the agent. You should see `SP-API access token obtained` in the log.
+
+#### Troubleshooting SP-API
+
+| Problem | Fix |
+|---------|-----|
+| Developer registration rejected | Resubmit with clearer description. Mention "personal use, own seller account only" |
+| "Invalid grant" error | Your refresh token expired or was revoked. Go back to Seller Central > Develop Apps > Authorize again to get a new one |
+| 403 Forbidden on API calls | Your IAM role might not have the right permissions. Make sure it has admin access or the specific SP-API permissions |
+| App stuck in "Draft" | You need to complete the developer profile and get approved first |
+| Can't find "Develop Apps" menu | Go to Settings > User Permissions and make sure your account has developer access enabled |
 
 ---
 
