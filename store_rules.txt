@@ -1,0 +1,22 @@
+## How to use this file
+##
+## Add rules for the specific stores/retailers you buy from.
+## The agent reads this file and includes it in Claude's instructions.
+## Be as specific as possible about receipt formats so Claude parses them correctly.
+##
+## Delete these comments and replace with your own store rules. Examples below.
+##
+## ─────────────────────────────────────────────────────
+## EXAMPLE: WALMART RECEIPTS
+## - Item format: product name on one line, price on the next
+## - "ST#" at the top = store number, ignore it
+## - OrderID = "TC#" (transaction code) at the bottom
+## - Date at the top in MM/DD/YYYY format
+## - SUBTOTAL = pre-tax, TAX = combined GST+PST, TOTAL = final
+##
+## EXAMPLE: COSTCO RECEIPTS
+## - Items listed with item number, description, then price
+## - "A" or "E" after price = taxable item
+## - Member number at top — ignore it
+## - OrderID = last 4 digits of register + transaction number
+## ─────────────────────────────────────────────────────

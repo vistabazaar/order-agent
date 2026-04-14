@@ -1,0 +1,15 @@
+# Credentials — NEVER commit these
+credentials.json
+token.json
+.env
+
+# Runtime files
+agent.log
+last_run.txt
+processed_files.txt
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
